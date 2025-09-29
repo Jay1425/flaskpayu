@@ -10,6 +10,15 @@ class Config:
         f"sqlite:///{os.path.join(os.path.dirname(__file__), 'app.db')}"
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # Optional engine tweaks (SSL for Postgres, connection health)
+    SQLALCHEMY_ENGINE_OPTIONS = {}
+    _db_url = str(SQLALCHEMY_DATABASE_URI)
+    # Enable pre-ping to avoid stale connections in long-lived processes
+    SQLALCHEMY_ENGINE_OPTIONS["pool_pre_ping"] = True
+    # Allow forcing SSL mode via env for Postgres
+    _sslmode = os.getenv("DATABASE_SSLMODE")
+    if _db_url.startswith("postgresql://") and _sslmode:
+        SQLALCHEMY_ENGINE_OPTIONS["connect_args"] = {"sslmode": _sslmode}
 
     # Razorpay credentials (set Sandbox or Production via env vars)
     RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_test_xxxxxxxx")

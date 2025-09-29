@@ -38,6 +38,8 @@ $env:PAYU_SALT = "your_salt"
 $env:PAYU_BASE_URL = "https://test.payu.in/_payment"
 $env:PAYU_SUCCESS_URL = "http://localhost:5000/payment/payu/success"
 $env:PAYU_FAILURE_URL = "http://localhost:5000/payment/payu/failure"
+$env:DATABASE_URL = "sqlite:///app.db"  # or your Postgres URL
+# Example: $env:DATABASE_URL = "postgresql://fly-user:...@direct.k1v53olep7z08q6p.flympg.net/fly-db"
 ```
 
 3. Run the app:
@@ -106,3 +108,32 @@ fly secrets set BILLER_CODE=PGVCL
 After deploy, your app is available at https://<your-app>.fly.dev
 
 Health check is served at `/healthz`.
+
+### CI/CD via GitHub Actions
+
+This repo includes `.github/workflows/fly-deploy.yml` which deploys on push to `main`.
+
+1) In GitHub repo settings, add secret `FLY_API_TOKEN` (create with `fly auth token`).
+2) Push to `main`; the workflow runs `flyctl deploy --remote-only`.
+
+Environments (optional):
+- Create two Fly apps, e.g., `myapp-staging` and `myapp-prod`.
+- Maintain two branches or two workflows that set `--app` accordingly or use two `fly.toml` files and `--config` switch.
+
+### Optional: Fly Postgres
+
+```powershell
+fly pg create --name <db-name> --region bom --initial-cluster-size 1 --vm-size shared-cpu-1x
+fly pg attach <db-name> --app <your-app>
+```
+This will set `DATABASE_URL` secret automatically. Update `config.py` to use it (already supported). Run migrations/create tables on first boot.
+
+If you prefer to supply your own connection string, set `DATABASE_URL` to your Postgres URL, e.g.:
+
+```powershell
+$env:DATABASE_URL = "postgresql://fly-user:YOURPASS@direct.k1v53olep7z08q6p.flympg.net/fly-db"
+```
+
+Notes:
+- SQLAlchemy URI scheme should be `postgresql://` (not `postgres://`).
+- We include `psycopg2-binary` in requirements for local/dev convenience. For production, you may switch to `psycopg2`.
