@@ -15,10 +15,13 @@ jobs:
 
       - name: Set up Flyctl
         uses: superfly/flyctl-actions/setup-flyctl@v1
+        with:
+          version: v0.2.117
 
       - name: Deploy app
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          FLY_NONINTERACTIVE: 1
         run: |
-          export FLY_NONINTERACTIVE=1
-          flyctl deploy --remote-only --config fly.toml --app flask-pgvcl-billpay
+          flyctl status --app flask-pgvcl-billpay || echo "App not found, needs creation"
+          flyctl deploy --remote-only --app flask-pgvcl-billpay
