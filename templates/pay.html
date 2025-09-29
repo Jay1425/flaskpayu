@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pay Bill</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+  <div class="max-w-2xl mx-auto py-10 px-4" id="rzp-data"
+    data-key="{{ RAZORPAY_KEY_ID }}"
+    data-amount="{{ order.amount }}"
+    data-order-id="{{ order.razorpay_order_id }}"
+    data-order-uuid="{{ order.order_uuid }}"
+    data-name="{{ user.name }}"
+    data-email="{{ user.email }}"
+    data-contact="{{ user.phone }}"
+    data-gateway="{{ gateway or 'razorpay' }}">
+    <h1 class="text-2xl font-bold text-slate-800 mb-6">Pay Bill</h1>
+    <div class="bg-white rounded shadow p-6 space-y-3">
+      <div class="text-slate-700"><span class="font-medium">Consumer ID:</span> {{ user.consumer_id }}</div>
+      <div class="text-slate-700"><span class="font-medium">Order:</span> {{ order.order_uuid }}</div>
+      <div class="text-slate-700"><span class="font-medium">Amount:</span> ₹ {{ '%.2f' % (order.amount/100) }}</div>
+      {% if gateway == 'payu' %}
+        <form id="payuForm" method="post" action="{{ PAYU_BASE_URL }}" class="hidden">
+          {% for k, v in payu_params.items() %}
+          <input type="hidden" name="{{ k }}" value="{{ v }}" />
+          {% endfor %}
+        </form>
+        <button id="payBtn" class="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700">Pay with PayU</button>
+      {% else %}
+        <button id="payBtn" class="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700">Pay Now</button>
+      {% endif %}
+      <a href="/" class="text-slate-600 underline">Back</a>
+    </div>
+  </div>
+
+<script>
+const el = document.getElementById('rzp-data');
+const gw = (el && el.dataset && el.dataset.gateway) ? el.dataset.gateway : 'razorpay';
+if (gw === 'payu') {
+  document.getElementById('payBtn').addEventListener('click', () => {
+    document.getElementById('payuForm').submit();
+  });
+} else {
+  const data = el ? el.dataset : {};
+  const options = {
+    key: String(data.key || ''),
+    amount: Number(data.amount || 0),
+    currency: 'INR',
+    name: 'PGVCL BillPay Demo',
+    description: 'Order ' + String(data.orderUuid || ''),
+    order_id: String(data.orderId || ''),
+    handler: function(response){
+        fetch('/verify_payment', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify(response)
+        }).then(res => res.json()).then(() => {
+            window.location.href = '/receipt/' + String(data.orderUuid || '');
+        }).catch(() => {
+            window.location.href = '/receipt/' + String(data.orderUuid || '');
+        });
+    },
+    prefill: { name: String(data.name || ''), email: String(data.email || ''), contact: String(data.contact || '') },
+    theme: { color: '#059669' }
+  };
+  const rzp = new Razorpay(options);
+  document.getElementById('payBtn').addEventListener('click', () => rzp.open());
+}
+</script>
+</body>
+</html>

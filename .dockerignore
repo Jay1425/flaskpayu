@@ -1,0 +1,10 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.venv
+.env
+app.db
+.vscode
+.DS_Store
+node_modules

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PGVCL BillPay</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+  <div class="max-w-3xl mx-auto py-10 px-4">
+    <h1 class="text-3xl font-bold text-slate-800 mb-6">PGVCL Bill Payment</h1>
+
+    {% if error %}
+      <div class="bg-red-100 text-red-800 px-4 py-3 rounded mb-4">{{ error }}</div>
+    {% endif %}
+
+    <form action="/" method="POST" class="bg-white rounded shadow p-6 space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-600">Name</label>
+          <input name="name" class="mt-1 w-full border rounded px-3 py-2" required />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-600">Email</label>
+          <input name="email" type="email" class="mt-1 w-full border rounded px-3 py-2" required />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-600">Phone</label>
+          <input name="phone" class="mt-1 w-full border rounded px-3 py-2" required />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-600">PGVCL Consumer ID</label>
+          <input name="consumer_id" class="mt-1 w-full border rounded px-3 py-2" required />
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Fetch Bill / Pay Now</button>
+        <a href="/admin" class="text-slate-600 underline">Admin</a>
+      </div>
+    </form>
+
+    {% if recent_orders %}
+    <h2 class="text-xl font-semibold mt-10 mb-3">Recent Orders</h2>
+    <div class="overflow-x-auto bg-white rounded shadow">
+      <table class="min-w-full">
+        <thead class="bg-slate-100 text-slate-600 text-left">
+          <tr>
+            <th class="px-4 py-2">Order</th>
+            <th class="px-4 py-2">Status</th>
+            <th class="px-4 py-2">Amount</th>
+            <th class="px-4 py-2">Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in recent_orders %}
+          <tr class="border-t">
+            <td class="px-4 py-2"><a class="text-blue-600 underline" href="/pay/{{ o.order_uuid }}">{{ o.order_uuid[:8] }}...</a></td>
+            <td class="px-4 py-2">{{ o.status }}</td>
+            <td class="px-4 py-2">₹ {{ '%.2f' % (o.amount/100) }}</td>
+            <td class="px-4 py-2">{{ o.created_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+</body>
+</html>

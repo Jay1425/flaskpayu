@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+  <div class="max-w-6xl mx-auto py-10 px-4">
+    <h1 class="text-2xl font-bold text-slate-800 mb-6">Admin / Ledger</h1>
+    <div class="overflow-x-auto bg-white rounded shadow">
+      <table class="min-w-full">
+        <thead class="bg-slate-100 text-slate-600">
+          <tr>
+            <th class="px-4 py-2 text-left">Order</th>
+            <th class="px-4 py-2 text-left">Razorpay Order</th>
+            <th class="px-4 py-2 text-left">RZP Payment</th>
+            <th class="px-4 py-2 text-left">BBPS Txn</th>
+            <th class="px-4 py-2 text-left">Status</th>
+            <th class="px-4 py-2 text-left">Amount</th>
+            <th class="px-4 py-2 text-left">Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in orders %}
+          <tr class="border-t">
+            <td class="px-4 py-2"><a class="text-blue-600 underline" href="/receipt/{{ o.order_uuid }}">{{ o.order_uuid[:8] }}...</a></td>
+            <td class="px-4 py-2">{{ o.razorpay_order_id or '-' }}</td>
+            <td class="px-4 py-2">{{ (payments_by_order.get(o.id).payment_id) if payments_by_order.get(o.id) else '-' }}</td>
+            <td class="px-4 py-2">{{ (bbps_by_order.get(o.id).bbps_txn_id) if bbps_by_order.get(o.id) else '-' }}</td>
+            <td class="px-4 py-2">{{ o.status }}</td>
+            <td class="px-4 py-2">₹ {{ '%.2f' % (o.amount/100) }}</td>
+            <td class="px-4 py-2">{{ o.created_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if ledger %}
+    <h2 class="text-xl font-semibold mt-10 mb-3">Recent Ledger Entries</h2>
+    <div class="overflow-x-auto bg-white rounded shadow">
+      <table class="min-w-full">
+        <thead class="bg-slate-100 text-slate-600">
+          <tr>
+            <th class="px-4 py-2 text-left">When</th>
+            <th class="px-4 py-2 text-left">Order ID</th>
+            <th class="px-4 py-2 text-left">Type</th>
+            <th class="px-4 py-2 text-left">Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in ledger %}
+          <tr class="border-t">
+            <td class="px-4 py-2">{{ e.created_at }}</td>
+            <td class="px-4 py-2">{{ e.order_id or '-' }}</td>
+            <td class="px-4 py-2">{{ e.entry_type }}</td>
+            <td class="px-4 py-2">{{ e.message }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+</body>
+</html>
