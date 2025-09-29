@@ -13,15 +13,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Flyctl
-        uses: superfly/flyctl-actions/setup-flyctl@v1
-        with:
-          version: v0.2.117
+      - name: Install flyctl manually
+        run: |
+          curl -L https://fly.io/install.sh | sh
+          echo "$HOME/.fly/bin" >> $GITHUB_PATH
 
-      - name: Deploy app
+      - name: Verify app exists and deploy
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-          FLY_NONINTERACTIVE: 1
         run: |
-          flyctl status --app flask-pgvcl-billpay || echo "App not found, needs creation"
-          flyctl deploy --remote-only --app flask-pgvcl-billpay
+          export FLY_NONINTERACTIVE=1
+          
+          # Check if app exists
+          if ! flyctl apps list | grep -q "flask-pgvcl-billpay"; then
+            echo "Creating app flask-pgvcl-billpay..."
+            flyctl apps create flask-pgvcl-billpay --org personal
+          fi
+          
+          # Deploy directly without launch workflow
+          flyctl deploy --remote-only --app flask-pgvcl-billpay --dockerfile Dockerfile
