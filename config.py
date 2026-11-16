@@ -21,9 +21,9 @@ class Config:
         SQLALCHEMY_ENGINE_OPTIONS["connect_args"] = {"sslmode": _sslmode}
 
     # Razorpay credentials (set Sandbox or Production via env vars)
-    RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_test_xxxxxxxx")
-    RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "test_secret")
-    RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET", "test_webhook_secret")
+    RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', '')
+    RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', '')
+    RAZORPAY_WEBHOOK_SECRET = os.environ.get('RAZORPAY_WEBHOOK_SECRET', '')
 
     # BBPS aggregator credentials
     BBPS_AGGREGATOR_ID = os.getenv("BBPS_AGGREGATOR_ID", "demo-aggregator")
